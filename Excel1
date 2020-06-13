@@ -1,0 +1,139 @@
+Private Sub CommandButton1_Click()
+Dim grp As Integer
+Dim row As Integer
+Dim col As Integer
+Dim count As Integer
+Dim startID As Integer
+Dim i As Integer
+Dim j As Integer
+Dim k As Integer
+Dim n As Integer
+Dim z As Integer
+Dim in_open As Integer
+
+count = 1
+z = 2
+grp = 0
+While (grp = 0)
+If Worksheets("Sheet1").Range("A" & z).Value <> "" Then
+count = count + 1
+z = z + 1
+Else
+grp = 1
+End If
+Wend
+z = 2
+
+While (z <= count)
+grp = 0
+s1 = ""
+row = z
+startID = Worksheets("Sheet1").Range("A" & row).Value
+i = row + 1
+While (grp = 0)
+If Worksheets("Sheet1").Range("A" & i).Value = startID Then
+i = i + 1
+End If
+If Worksheets("Sheet1").Range("A" & i).Value <> startID Then
+grp = 1
+i = i - 1
+End If
+Wend
+j = row
+While (j <= i)
+grp = 0
+While (grp = 0)
+If Worksheets("Sheet1").Range("F" & j).Value = "O" Then
+startrec = j
+popen_count = Worksheets("Sheet1").Range("G" & j).Value
+End If
+If Worksheets("Sheet1").Range("F" & j).Value <> "C" Then
+j = j + 1
+End If
+If Worksheets("Sheet1").Range("F" & j).Value = "C" Then
+endrec = j
+pclose_count = Worksheets("Sheet1").Range("G" & j).Value
+grp = 1
+End If
+Wend
+in_open = 0
+For k = startrec To endrec
+RuleNum = Worksheets("Sheet1").Range("C" & k).Value
+If Worksheets("Sheet1").Range("D" & k).Value = "EQ" Then
+comprcd = "="
+End If
+If Worksheets("Sheet1").Range("D" & k).Value = "NE" Then
+comprcd = "<>"
+End If
+If in_open = 1 And Worksheets("Sheet1").Range("C" & k + 1).Value = RuleNum And Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value And comprcd = "=" Then
+s1 = s1 & "," & Worksheets("Sheet1").Range("E" & k).Value
+End If
+If in_open = 1 And Worksheets("Sheet1").Range("C" & k + 1).Value = RuleNum And Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value And comprcd = "<>" Then
+s1 = s1 & "," & Worksheets("Sheet1").Range("E" & k).Value
+End If
+
+
+If in_open = 0 Then
+If Worksheets("Sheet1").Range("H" & k).Value = "OR" Then
+s1 = s1 & " || "
+If Worksheets("Sheet1").Range("F" & k).Value = "O" Then
+For m = 1 To popen_count
+s1 = s1 & "("
+Next
+End If
+End If
+If Worksheets("Sheet1").Range("H" & k).Value = "AND" Then
+s1 = s1 & " && "
+If Worksheets("Sheet1").Range("F" & k).Value = "O" Then
+For m = 1 To popen_count
+s1 = s1 & "("
+Next
+End If
+End If
+If Worksheets("Sheet1").Range("H" & k).Value = "" Then
+If Worksheets("Sheet1").Range("F" & k).Value = "O" Then
+For m = 1 To popen_count
+s1 = s1 & "("
+Next
+End If
+End If
+End If
+If in_open = 0 And Worksheets("Sheet1").Range("C" & k + 1).Value = RuleNum And Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value And comprcd = "=" Then
+s1 = s1 & RuleNum & " IN(" & Worksheets("Sheet1").Range("E" & k).Value
+in_open = 1
+End If
+If in_open = 0 And Worksheets("Sheet1").Range("C" & k + 1).Value = RuleNum And Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value And comprcd = "<>" Then
+s1 = s1 & RuleNum & " NOT IN(" & Worksheets("Sheet1").Range("E" & k).Value
+in_open = 1
+End If
+If in_open = 0 And (Worksheets("Sheet1").Range("C" & k + 1).Value <> RuleNum Or Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value) And comprcd = "=" Then
+s1 = s1 & RuleNum & "=" & Worksheets("Sheet1").Range("E" & k).Value
+End If
+If in_open = 0 And (Worksheets("Sheet1").Range("C" & k + 1).Value <> RuleNum Or Worksheets("Sheet1").Range("D" & k).Value = Worksheets("Sheet1").Range("D" & k + 1).Value) And comprcd = "<>" Then
+s1 = s1 & RuleNum & "<>" & Worksheets("Sheet1").Range("E" & k).Value
+End If
+
+If in_open = 1 And (Worksheets("Sheet1").Range("C" & k + 1).Value <> RuleNum Or Worksheets("Sheet1").Range("D" & k).Value <> Worksheets("Sheet1").Range("D" & k + 1).Value) Then
+s1 = s1 & "," & Worksheets("Sheet1").Range("E" & k).Value & ")"
+in_open = 0
+End If
+
+If k > startrec Then
+If Worksheets("Sheet1").Range("F" & k).Value = "O" Then
+For n = 1 To Worksheets("Sheet1").Range("G" & k).Value
+s1 = s1 & "("
+Next
+End If
+End If
+If k = endrec Then
+For o = 1 To pclose_count
+s1 = s1 & ")"
+Next
+End If
+Next
+j = endrec + 1
+Wend
+Worksheets("Sheet1").Range("j" & j - 1).Value = s1
+z = j
+Wend
+End Sub
